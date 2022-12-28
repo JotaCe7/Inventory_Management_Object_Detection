@@ -67,7 +67,7 @@ def predict_bboxes(img_name):
     img_name2 =  ''.join(img_base_name) + '_heat' + extension
     pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name2)  
     # Predict (draw all bounding boxes with heatmp) and store
-    img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, skip_plot = True, style = 'heatmap' ) 
+    img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = 'heatmap' ) 
     cv2.imwrite(pred_img_path,img_pred)                    # store as: "predictions/<img_name_heatmap.jpg>"
                         
 

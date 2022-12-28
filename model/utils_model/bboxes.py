@@ -117,6 +117,8 @@ def euristic_detection(img_path: str, box_coordinates):
   dist = cv2.distanceTransform(white, cv2.DIST_L1 , maskSize=3).astype(np.uint8)
 
   heatmap_img = cv2.applyColorMap(dist, cv2.COLORMAP_JET)
+  
+  # return merge_empty_detection(img, heatmap_img, (x_min, y_min))
 
   hsv=cv2.cvtColor(heatmap_img,cv2.COLOR_BGR2HSV)
 
@@ -127,6 +129,8 @@ def euristic_detection(img_path: str, box_coordinates):
 
 
   heatmap_img[bluepenMask>0] = (255,255,255)
+  
+  return merge_empty_detection(img, heatmap_img, (x_min, y_min))
 
   #This is for contour
   heatmap_img = cv2.cvtColor(heatmap_img, cv2.COLOR_BGR2GRAY)

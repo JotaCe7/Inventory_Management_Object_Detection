@@ -15,8 +15,6 @@ body {
 }
 
 #instruction {
-    margin: 1.5cm;
-    text-align: center;
     color: whitesmoke;
     font-weight: normal;
     font-size: 175%;
@@ -105,57 +103,7 @@ input[type=text] {
     font-size: 22px;
 }
 
-/* LOGOUT SECTION */
 
-#logout-section {
-    display: flex;
-    justify-content: center;
-}
-
-header {
-    display: flex;
-    justify-content: center;
-    background-color: #293A62;
-    height: 6em;
-    margin: -10px;
-}
-
-footer {
-    position: fixed;
-    bottom: 0em;
-    display: flex;
-    justify-content: center;
-    color: whitesmoke;
-    font-size: 20px
-}
-
-#linkedin-link {
-    float: left;
-    margin-top: 1em;
-    margin-right: 1em;
-}
-
-#linkedin-logo {
-    transition: 0.5s;
-    height: 3em;
-    width: auto;
-    margin-bottom: auto;
-}
-
-#linkedin-logo:hover {
-    transition: 0.5s;
-    -ms-transform: scale(115%);
-    transform: scale(115%);
-}
-
-#anyone-logo {
-    height: 6em;
-}
-
-#contact {
-    margin-top: 1.2em;
-    margin-right: 1em;
-}
 
 #uploaded-image-container {
     display: flex;
@@ -257,3 +205,57 @@ footer {
 
 .hidden{display:none}
 
+
+
+
+/* LOGOUT SECTION */
+
+#logout-section {
+  display: flex;
+  justify-content: center;
+}
+
+header {
+  display: flex;
+  justify-content: center;
+  background-color: #293A62;
+  height: 6em;
+  margin: -10px;
+}
+
+footer {
+  position: fixed;
+  bottom: 0em;
+  display: flex;
+  justify-content: center;
+  color: whitesmoke;
+  font-size: 20px
+}
+
+#linkedin-link {
+  float: left;
+  margin-top: 1em;
+  margin-right: 1em;
+}
+
+#linkedin-logo {
+  transition: 0.5s;
+  height: 3em;
+  width: auto;
+  margin-bottom: auto;
+}
+
+#linkedin-logo:hover {
+  transition: 0.5s;
+  -ms-transform: scale(115%);
+  transform: scale(115%);
+}
+
+#anyone-logo {
+  height: 6em;
+}
+
+#contact {
+  margin-top: 1.2em;
+  margin-right: 1em;
+}
