@@ -13,7 +13,7 @@ db = redis.Redis(
                 )
 
 
-def model_predict(image_name: str, annotation_style: str):
+def model_predict(image_name: str, annotation_style: str, show_heuristic: bool):
     """
     Receives an image name and queues the job into Redis.
     Will loop until getting the answer from our ML service.
@@ -24,6 +24,8 @@ def model_predict(image_name: str, annotation_style: str):
         Name for the image uploaded by the user.
     annotation_style : str
         Annotation style to display output image ('heatmap' or 'bbox')
+    show_heuristic: bool 
+        Whether to show heuristic detection or not
 
     Returns
     -------
@@ -37,7 +39,8 @@ def model_predict(image_name: str, annotation_style: str):
     job_data = {
                   "id": job_id,
                   "image_name": image_name,
-                  "annotation_style": annotation_style
+                  "annotation_style": annotation_style,
+                  "show_heuristic": show_heuristic
                 }
 
     #  Send the job to the model service using Redis

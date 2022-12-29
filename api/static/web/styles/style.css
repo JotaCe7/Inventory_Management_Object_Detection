@@ -50,6 +50,11 @@ section {
     color:#fff;
   }
 
+.form__group>div {
+  margin: 1em;
+}  
+
+
 [type="checkbox"],[type="radio"]{box-sizing:border-box;padding:0}
 .div_checkbox{min-width: 200px; display: flex; flex-direction: row;}
 @media all and (max-width: 1400px){.div_checkbox{min-width: 150;}}
@@ -204,7 +209,7 @@ input[type=text] {
     font-size: 2rem;
 }
 
-.img_container>img {
+.output_img {
     max-width: 30rem;
     width: 100%;
     margin: 4rem;
@@ -217,7 +222,9 @@ input[type=text] {
 }
 
 .img_container>div {
-    margin: 4rem;
+  max-width: 30rem;
+  width: 100%;
+  margin: 4rem;
 }
 
 .hidden{display:none}

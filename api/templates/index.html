@@ -36,20 +36,24 @@
         <div id="form_detect">
 
           <div class="img_container">
-            <img id="my_preview" />
+            <img class="output_img" id="my_preview" />
           </div>
           
           <div class="form__group">
             <div>
+              <input type="checkbox" id="heuristic" name="heuristic" value="True">
+              <label for="heuristic"> Show heuristic detection</label><br>
+            </div>
+            <div>
               <div class="section__heading">Select annotation style &nbsp</div> 
-                <div >
-                  <div class="div_checkbox">
-                    <label><input type="radio", name="rbtn_output_selection" value="heatmap">Heatmap</label> <br>
-                  </div>
-                  <div class="div_checkbox">
-                    <label><input type="radio", name="rbtn_output_selection" value="bbox">Bounding box</label> <br>
-                  </div>
+              <div >
+                <div class="div_checkbox">
+                  <label><input type="radio", name="rbtn_output_selection" value="heatmap">Heatmap</label> <br>
                 </div>
+                <div class="div_checkbox">
+                  <label><input type="radio", name="rbtn_output_selection" value="bbox">Bounding box</label> <br>
+                </div>
+              </div>
             </div>
             <div id="upload-section">
               <input id="upload-button" type="submit" value="Scan image" class="button" />
@@ -62,12 +66,22 @@
 
       {% if filename %}
         <div class="img_container">
-            <img
-              src="{{ url_for('app_router.display_heatmap', filename=filename) }}"
-            />
-          <img
-            src="{{ url_for('app_router.display_predict', filename=filename) }}"
-          />
+              {% if context['annotation_style'] == "bbox" %}
+              <img class="output_img"
+                src="{{ url_for('app_router.display_bbox', filename=filename) }}"
+              />
+              {% endif %}
+              {% if context['annotation_style'] == "heatmap" %}
+              <img class="output_img"
+                src="{{ url_for('app_router.display_heatmap', filename=filename) }}"
+              />
+              {% endif %}
+              {% if context['show_heuristic'] %}
+              <img class="output_img"
+                src="{{ url_for('app_router.display_heuristic', filename=filename) }}"
+              />
+              {% endif %}
+
         </div>
         {% if context['mAP2'] %}
           <div class="row">

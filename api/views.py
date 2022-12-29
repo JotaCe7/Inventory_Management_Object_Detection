@@ -68,19 +68,25 @@ def index():
             else:
               flash("** Please select an annotation style")
               return redirect(request.url+"#upload_image")
+
+            if "heuristic" in request.form:
+              show_heuristic = True
+            else:
+              show_heuristic = False
             
             print(request.form)
             print(img_name)
             print(annotation_style)
 
             # Sent image to be processed by the ML model
-            mAP = model_predict(img_name, annotation_style)
+            mAP = model_predict(img_name, annotation_style, show_heuristic)
         
             # Updates context
             context = {
                     "mAP": mAP,
                     "filename": img_path,
-                    "annotation_style": annotation_style
+                    "annotation_style": annotation_style,
+                    "show_heuristic": show_heuristic
                     }
             
             # Update `render_template()` parameters as needed 
@@ -98,8 +104,8 @@ def display_image(filename):
     """
     return redirect(url_for("static", filename="uploads/" + filename))
 
-@router.route("/display_predict/<filename>")
-def display_predict(filename):
+@router.route("/display_bbox/<filename>")
+def display_bbox(filename):
     """
     Display image predicted by the model in our UI.
     """
@@ -115,6 +121,16 @@ def display_heatmap(filename):
     """
     basename, extension = os.path.splitext(filename)
     filename2 = basename + "_heat" + extension
+
+    return redirect(url_for("static", filename="predictions/" + filename2))
+
+@router.route("/display_heuristic/<filename>")
+def display_heuristic(filename):
+    """
+    Display image predicted by the model in our UI.
+    """
+    basename, extension = os.path.splitext(filename)
+    filename2 = basename + "_heur" + extension
 
     return redirect(url_for("static", filename="predictions/" + filename2))
 

@@ -24,7 +24,7 @@ db = redis.Redis(
 model = get_model()
 
 
-def predict_bboxes(img_name, annotation_style):
+def predict_bboxes(img_name, annotation_style, show_heuristic=False):
     """
     Loads the original image and logs the new image
     with the bounding boxes. It stores it a new folder
@@ -54,21 +54,36 @@ def predict_bboxes(img_name, annotation_style):
     extension = '.' + img_name.split('.')[-1]
     img_base_name = img_name.split('.')[:-1]
     
-    img_eur = euristic_detection(orig_img_path, best_bboxes)
+    if show_heuristic:
+      img_heur = euristic_detection(orig_img_path, best_bboxes)
+      img_name =  ''.join(img_base_name) + '_heur' + extension
+      heu_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name)  
+      cv2.imwrite(heu_img_path, img_heur)
+ 
+    if annotation_style == 'bbox':
+      img_name =  ''.join(img_base_name) + '_bbox' + extension
+    else:
+      img_name =  ''.join(img_base_name) + '_heat' + extension
+    pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name)  
+    # Annotate image and stores it
+    img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
+    cv2.imwrite(pred_img_path, img_pred)   
 
-    ## 1. BBox
-    img_name1 =  ''.join(img_base_name) + '_bbox' + extension
-    pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name1)  
-    # Predict (draw all bounding boxes) and store
-    img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
-    cv2.imwrite(pred_img_path, img_eur)                    # store as: "predictions/<img_name_bbox.jpg>"
+
+
+    # ## 1. BBox
+    # img_name1 =  ''.join(img_base_name) + '_bbox' + extension
+    # pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name1)  
+    # # Annotate image and stores it
+    # img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
+    # cv2.imwrite(pred_img_path, img_pred)                    # store as: "predictions/<img_name_bbox.jpg>"
     
-    ## 2. Heatmap 
-    img_name2 =  ''.join(img_base_name) + '_heat' + extension
-    pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name2)  
-    # Predict (draw all bounding boxes with heatmp) and store
-    img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
-    cv2.imwrite(pred_img_path,img_pred)                    # store as: "predictions/<img_name_heatmap.jpg>"
+    # ## 2. Heatmap 
+    # img_name2 =  ''.join(img_base_name) + '_heat' + extension
+    # pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name2)  
+    
+    # img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
+    # cv2.imwrite(pred_img_path,img_pred)                    # store as: "predictions/<img_name_heatmap.jpg>"
                         
 
 def classify_process():
@@ -92,9 +107,10 @@ def classify_process():
         img_name = job_data['image_name']
         job_id =  job_data['id']
         annotation_style = job_data['annotation_style']
-        
+        show_heuristic = job_data['show_heuristic']
+
         # Predict
-        predict_bboxes(img_name, annotation_style)
+        predict_bboxes(img_name, annotation_style, show_heuristic)
         
         pred_dict = {
                     "mAP": "[TO BE IMPLEMENTED]",
