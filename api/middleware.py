@@ -13,7 +13,7 @@ db = redis.Redis(
                 )
 
 
-def model_predict(image_name):
+def model_predict(image_name: str, annotation_style: str):
     """
     Receives an image name and queues the job into Redis.
     Will loop until getting the answer from our ML service.
@@ -22,6 +22,8 @@ def model_predict(image_name):
     ----------
     image_name : str
         Name for the image uploaded by the user.
+    annotation_style : str
+        Annotation style to display output image ('heatmap' or 'bbox')
 
     Returns
     -------
@@ -32,26 +34,24 @@ def model_predict(image_name):
 
     # Assign an unique ID for this job and add it to the queue..
     job_id = str(uuid4())
-    
-    #  Create a dict with the job metadata we will send through Redis.
-    job_data = json.dumps(  {
-                            "id": job_id,
-                            "image_name": image_name
-                            }                           )
+    job_data = {
+                  "id": job_id,
+                  "image_name": image_name,
+                  "annotation_style": annotation_style
+                }
 
     #  Send the job to the model service using Redis
-    
     db.lpush(
-            settings.REDIS_QUEUE,
-            job_data
+              settings.REDIS_QUEUE,
+              json.dumps(job_data)
             )
 
     # Loop until we received the response from our ML model
     while True:
         # Attempt to get model predictions using job_id
-        output = db.get(job_id)
+        response = db.get(job_id)
       
-        if output:
+        if response:
             db.delete(job_id)
             break
 
@@ -59,7 +59,7 @@ def model_predict(image_name):
         time.sleep(settings.API_SLEEP)
 
     #  Change the output format
-    output_dict =json.loads(output)                                                
-    mAP = output_dict.values()
+    response_dict =json.loads(response)                                                
+    mAP = response_dict.values()
     
     return mAP

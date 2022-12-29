@@ -55,25 +55,35 @@ def index():
         # File received and it's an image, we must show it and get predictions
         if file and utils.allowed_file(file.filename):
             
-            # 1. Creates unique name
+            # Creates unique name
             img_name = utils.get_file_hash(file)
             img_path = os.path.join(settings.UPLOAD_FOLDER,img_name)
             
-            # 2. Stores image in 'static\uploads'
+            # Stores image in 'static\uploads'
             print('PATH:' , img_path)
             file.save(img_path)
             file.close()
+            if 'rbtn_output_selection' in request.form:
+              annotation_style = request.form['rbtn_output_selection']
+            else:
+              flash("** Please select an annotation style")
+              return redirect(request.url+"#upload_image")
             
-            # 3. Sents image to be processed by the ML model
-            mAP = model_predict(img_name)       
+            print(request.form)
+            print(img_name)
+            print(annotation_style)
+
+            # Sent image to be processed by the ML model
+            mAP = model_predict(img_name, annotation_style)
         
-            # 4. Updates context
+            # Updates context
             context = {
                     "mAP": mAP,
-                    "filename": img_path                      
+                    "filename": img_path,
+                    "annotation_style": annotation_style
                     }
             
-            # 5. Update `render_template()` parameters as needed 
+            # Update `render_template()` parameters as needed 
             return render_template("index.html", filename=img_name, context=context)
         # File received and but it isn't an image
         else:

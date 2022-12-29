@@ -29,15 +29,32 @@
       <form method="post" action="/" enctype="multipart/form-data">
   
         <input type="file" id="uploaded_img" name="file" class="hidden" required>
-        <div id="instruction">Select an image to &nbsp</div>
-        <label id="instruction" for="uploaded_img" class="label_button"><u>Upload</u></label>
+        <div >Select an image to 
+        <label for="uploaded_img" class="label_button"><u> Upload</u></label> </div>
         <br>
-        <div id="display_image222" class="img_container">
-          <img id="my_preview" />
-        </div>
-  
-        <div id="upload-section">
-          <input id="upload-button" type="submit" value="Scan image" class="button" />
+
+        <div id="form_detect">
+
+          <div class="img_container">
+            <img id="my_preview" />
+          </div>
+          
+          <div class="form__group">
+            <div>
+              <div class="section__heading">Select annotation style &nbsp</div> 
+                <div >
+                  <div class="div_checkbox">
+                    <label><input type="radio", name="rbtn_output_selection" value="heatmap">Heatmap</label> <br>
+                  </div>
+                  <div class="div_checkbox">
+                    <label><input type="radio", name="rbtn_output_selection" value="bbox">Bounding box</label> <br>
+                  </div>
+                </div>
+            </div>
+            <div id="upload-section">
+              <input id="upload-button" type="submit" value="Scan image" class="button" />
+            </div>
+          </div>
         </div>
       </form>
       
@@ -70,7 +87,7 @@
           </form>
         {% endif %}
 
-        <div id="instruction" class="text-3xl mt-4"><a href="{{ url_for('app_router.new_upload') }}">Upload</a> a new image</div>
+        <div class="text-3xl mt-4"><a href="{{ url_for('app_router.new_upload') }}">Upload</a> a new image</div>
     
       {% endif %}
     </section>
