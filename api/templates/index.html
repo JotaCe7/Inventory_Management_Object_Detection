@@ -62,12 +62,9 @@
 
       {% if filename %}
         <div class="img_container">
-          <div>
             <img
               src="{{ url_for('app_router.display_heatmap', filename=filename) }}"
             />
-            
-          </div>
           <img
             src="{{ url_for('app_router.display_predict', filename=filename) }}"
           />
