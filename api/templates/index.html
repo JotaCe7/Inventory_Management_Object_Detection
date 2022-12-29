@@ -62,11 +62,14 @@
 
       {% if filename %}
         <div class="img_container">
+          <div>
+            <img
+              src="{{ url_for('app_router.display_heatmap', filename=filename) }}"
+            />
+            
+          </div>
           <img
-            src="{{ url_for('app_router.display_heatmap', filename=filename) }}"
-          />
-          <img
-            src="{{ url_for('app_router.display_predict', filename=filename) }}" alt="BLABLABLA"
+            src="{{ url_for('app_router.display_predict', filename=filename) }}"
           />
         </div>
         {% if context['mAP2'] %}
@@ -87,7 +90,7 @@
           </form>
         {% endif %}
 
-        <div class="text-3xl mt-4"><a href="{{ url_for('app_router.new_upload') }}">Upload</a> a new image</div>
+        <div><a href="{{ url_for('app_router.new_upload') }}" class="label_button">Upload</a> a new image</div>
     
       {% endif %}
     </section>
