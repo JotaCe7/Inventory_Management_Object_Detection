@@ -49,7 +49,8 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
     bboxes = df[["xmin","ymin","xmax","ymax","class"]]
     # Non-Max Supression: Filter only best bounding boxes
     best_bboxes = NMS(bboxes.to_numpy(), overlapThresh= settings.OVERLAP_THRESH)
-    
+
+
     # Build image name and path
     extension = '.' + img_name.split('.')[-1]
     img_base_name = img_name.split('.')[:-1]
@@ -57,11 +58,11 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
     if show_heuristic:
       img_name =  ''.join(img_base_name) + '_heur' + extension
       heu_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name)  
-      if best_bboxes:
+      if best_bboxes.empty:
+        cv2.imwrite(heu_img_path, img_orig)
+      else:
         img_heur = euristic_detection(orig_img_path, best_bboxes)
         cv2.imwrite(heu_img_path, img_heur)
-      else:
-        cv2.imwrite(heu_img_path, img_orig)
  
     if annotation_style == 'bbox':
       img_name =  ''.join(img_base_name) + '_bbox' + extension
@@ -69,11 +70,11 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
       img_name =  ''.join(img_base_name) + '_heat' + extension
     pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name)  
     # Annotate image and stores it
-    if best_bboxes:
+    if best_bboxes.empty:
+      cv2.imwrite(pred_img_path, img_orig)
+    else:
       img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
       cv2.imwrite(pred_img_path, img_pred)   
-    else:
-      cv2.imwrite(pred_img_path, img_orig)
 
 
     # ## 1. BBox

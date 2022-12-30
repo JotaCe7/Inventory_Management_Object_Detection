@@ -179,7 +179,7 @@ def NMS(boxes, overlapThresh = 0.4):
     
     #return an empty list, if no boxes given
     if len(boxes) == 0:
-        return []
+        return pd.DataFrame()
     x1 = boxes[:, 0]  # x coordinate of the top-left corner
     y1 = boxes[:, 1]  # y coordinate of the top-left corner
     x2 = boxes[:, 2]  # x coordinate of the bottom-right corner
