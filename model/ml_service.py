@@ -55,10 +55,13 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
     img_base_name = img_name.split('.')[:-1]
     
     if show_heuristic:
-      img_heur = euristic_detection(orig_img_path, best_bboxes)
       img_name =  ''.join(img_base_name) + '_heur' + extension
       heu_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name)  
-      cv2.imwrite(heu_img_path, img_heur)
+      if best_bboxes:
+        img_heur = euristic_detection(orig_img_path, best_bboxes)
+        cv2.imwrite(heu_img_path, img_heur)
+      else:
+        cv2.imwrite(heu_img_path, img_orig)
  
     if annotation_style == 'bbox':
       img_name =  ''.join(img_base_name) + '_bbox' + extension
@@ -66,9 +69,11 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
       img_name =  ''.join(img_base_name) + '_heat' + extension
     pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name)  
     # Annotate image and stores it
-    img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
-    cv2.imwrite(pred_img_path, img_pred)   
-
+    if best_bboxes:
+      img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
+      cv2.imwrite(pred_img_path, img_pred)   
+    else:
+      cv2.imwrite(pred_img_path, img_orig)
 
 
     # ## 1. BBox
