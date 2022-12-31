@@ -28,7 +28,7 @@ class COLORMAPS(Enum):
 
 
 
-def plot_bboxes(img_path, box_coordinates, style: str = 'bbox'):
+def plot_bboxes(img, box_coordinates, style: str = 'bbox'):
     """ 
     It plots the bounding boxes in green when products are present.
     If there are missing products, then red bboxes are drawn.
@@ -60,53 +60,53 @@ def plot_bboxes(img_path, box_coordinates, style: str = 'bbox'):
         Image plotted.
     """
     #Read the image
-    img = cv2.imread(img_path)
+    #img = cv2.imread(img_path)
     
     if style == 'bbox':
       
         # Plot all boxes
-        for _, box_coords in box_coordinates.iterrows():
-            
-            x1, y1, x2, y2 = (box_coords.x1, box_coords.y1, box_coords.x2, box_coords.y2)
-            if box_coords['class'] == CLASSES.PRODUCT.value:
+        for row in box_coordinates:
+            x1, y1, x2, y2, conf, cls = row
+            if cls == CLASSES.PRODUCT.value:
                 img = cv2.rectangle(img, (x1, y1), (x2, y2), settings.COLOR_BLUE, thickness=5)
             else:
                 img = cv2.rectangle(img, (x1, y1), (x2, y2), settings.COLOR_RED, thickness=7)
                   
     
     elif style == 'heatmap':
-        
         for cls in CLASSES:
-          img = apply_heatmap(img,box_coordinates.loc[box_coordinates['class']==cls.value,:], getattr(cv2, COLORMAPS[cls.name].value))
+          img = apply_heatmap(img,box_coordinates[box_coordinates[:,5]==cls.value], getattr(cv2, COLORMAPS[cls.name].value))
 
     return img
 
 def apply_heatmap(img, bboxes, colormap):
   h, w , _ = img.shape
   img_bw = np.zeros((h,w,1), np.uint8)
-  for _, row in bboxes.iterrows():
-    img_bw[row["y1"]:row["y2"], row["x1"]:row["x2"]] = 255
+  for row in bboxes:
+    img_bw[row[1]:row[3], row[0]:row[2]] = 255
   img_bw = cv2.distanceTransform(img_bw, cv2.DIST_L1, maskSize=5).astype(np.uint8)
   img_bw = cv2.applyColorMap(img_bw, colormap)
-
-  for _, row in bboxes.iterrows():
-    merged_bbox  = cv2.addWeighted( img_bw[row["y1"]:row["y2"],row["x1"]:row["x2"]], 0.8, img[row["y1"]:row["y2"],row["x1"]:row["x2"]], 0.2, 0)
-    img[row["y1"]:row["y2"],row["x1"]:row["x2"]] = merged_bbox
+  
+  for row in bboxes:
+    merged_bbox  = cv2.addWeighted( img_bw[row[1]:row[3], row[0]:row[2]], 0.8, img[row[1]:row[3], row[0]:row[2]], 0.2, 0)
+    img[row[1]:row[3], row[0]:row[2]] = merged_bbox
 
   return img
 
-def euristic_detection(img_path: str, box_coordinates):
+def euristic_detection(img, box_coordinates):
   
   #Read the image
-  img = cv2.imread(img_path)
-  x_min,x_max,y_min,y_max = box_coordinates["x1"].min(), box_coordinates["x2"].max(), box_coordinates["y1"].min(), box_coordinates["y2"].max()
+  # img = cv2.imread(img_path)
+  # x_min,x_max,y_min,y_max = box_coordinates["x1"].min(), box_coordinates["x2"].max(), box_coordinates["y1"].min(), box_coordinates["y2"].max()
+  x_min,x_max,y_min,y_max = box_coordinates[:,0].min(), box_coordinates[:,2].max(), box_coordinates[:,1].min(), box_coordinates[:,3].max()
   height, width, channels = img.shape
 
   white = np.zeros((height, width), np.uint8)
 
-  for _,row in box_coordinates.iterrows():
-      if row['class'] == CLASSES.PRODUCT.value:
-        white  = cv2.rectangle(white, (row["x1"]+24, row["y1"]+6), (row["x2"]-24, row["y2"]-6),
+  for row in box_coordinates:
+      x1, y1, x2, y2, conf, cls = row
+      if cls == CLASSES.PRODUCT.value:
+        white  = cv2.rectangle(white, (x1+24, y1+6), (x2-24, y2-6),
             (255,0,0),-1)
 
   white =  255 - white
@@ -130,7 +130,7 @@ def euristic_detection(img_path: str, box_coordinates):
 
   heatmap_img[bluepenMask>0] = (255,255,255)
   
-  return merge_empty_detection(img, heatmap_img, (x_min, y_min))
+  return merge_empty_detection(img.copy(), heatmap_img, (x_min, y_min))
 
   #This is for contour
   heatmap_img = cv2.cvtColor(heatmap_img, cv2.COLOR_BGR2GRAY)
@@ -144,8 +144,6 @@ def euristic_detection(img_path: str, box_coordinates):
   return crop
 
 def merge_empty_detection(img, detection, x_y_min):
-  print(detection.ndim)
-  print(detection.shape)
   if detection.ndim == 2:
     h,w   = detection.shape
     n_channels = 1
@@ -179,7 +177,7 @@ def NMS(boxes, overlapThresh = 0.4):
     
     #return an empty list, if no boxes given
     if len(boxes) == 0:
-        return pd.DataFrame()
+        return []
     x1 = boxes[:, 0]  # x coordinate of the top-left corner
     y1 = boxes[:, 1]  # y coordinate of the top-left corner
     x2 = boxes[:, 2]  # x coordinate of the bottom-right corner
@@ -212,7 +210,7 @@ def NMS(boxes, overlapThresh = 0.4):
     best_bboxes =   boxes[indices].astype(int)
     
     
-    best_bboxes_df = pd.DataFrame(data = best_bboxes, columns=["x1","y1","x2","y2","class"])
+    #best_bboxes_df = pd.DataFrame(data = best_bboxes, columns=["x1","y1","x2","y2","class"])
     
     
-    return best_bboxes_df
+    return best_bboxes

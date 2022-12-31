@@ -44,11 +44,8 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
     
     # Get bounding boxes
     output = model(img_orig)
-    df = output.pandas().xyxy[0]
-    # df = df.sort_values("class")
-    bboxes = df[["xmin","ymin","xmax","ymax","class"]]
     # Non-Max Supression: Filter only best bounding boxes
-    best_bboxes = NMS(bboxes.to_numpy(), overlapThresh= settings.OVERLAP_THRESH)
+    best_bboxes = NMS(output.xyxy[0].numpy(), overlapThresh= settings.OVERLAP_THRESH)
 
 
     # Build image name and path
@@ -58,10 +55,10 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
     if show_heuristic:
       img_name =  ''.join(img_base_name) + '_heur' + extension
       heu_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name)  
-      if best_bboxes.empty:
+      if best_bboxes.size == 0:
         cv2.imwrite(heu_img_path, img_orig)
       else:
-        img_heur = euristic_detection(orig_img_path, best_bboxes)
+        img_heur = euristic_detection(img_orig, best_bboxes)
         cv2.imwrite(heu_img_path, img_heur)
  
     if annotation_style == 'bbox':
@@ -70,27 +67,13 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
       img_name =  ''.join(img_base_name) + '_heat' + extension
     pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name)  
     # Annotate image and stores it
-    if best_bboxes.empty:
+    if best_bboxes.size == 0:
       cv2.imwrite(pred_img_path, img_orig)
+      return img_orig
     else:
-      img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
-      cv2.imwrite(pred_img_path, img_pred)   
-
-
-    # ## 1. BBox
-    # img_name1 =  ''.join(img_base_name) + '_bbox' + extension
-    # pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name1)  
-    # # Annotate image and stores it
-    # img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
-    # cv2.imwrite(pred_img_path, img_pred)                    # store as: "predictions/<img_name_bbox.jpg>"
-    
-    # ## 2. Heatmap 
-    # img_name2 =  ''.join(img_base_name) + '_heat' + extension
-    # pred_img_path = os.path.join(settings.PREDICTIONS_FOLDER, img_name2)  
-    
-    # img_pred = plot_bboxes(orig_img_path, box_coordinates= best_bboxes, style = annotation_style) 
-    # cv2.imwrite(pred_img_path,img_pred)                    # store as: "predictions/<img_name_heatmap.jpg>"
-                        
+      img_pred = plot_bboxes(img_orig, box_coordinates= best_bboxes, style = annotation_style) 
+      cv2.imwrite(pred_img_path, img_pred)     
+      return img_pred       
 
 def classify_process():
     """
@@ -116,7 +99,7 @@ def classify_process():
         show_heuristic = job_data['show_heuristic']
 
         # Predict
-        predict_bboxes(img_name, annotation_style, show_heuristic)
+        img_out = predict_bboxes(img_name, annotation_style, show_heuristic)
         
         pred_dict = {
                     "mAP": "[TO BE IMPLEMENTED]",
