@@ -13,15 +13,18 @@ db = redis.Redis(
                 )
 
 
-def model_predict(image_name: str, annotation_style: str, show_heuristic: bool):
+def model_predict(image_name_data: str, is_streaming : bool, annotation_style: str, show_heuristic: bool):
     """
     Receives an image name and queues the job into Redis.
     Will loop until getting the answer from our ML service.
 
     Parameters
     ----------
-    image_name : str
-        Name for the image uploaded by the user.
+    image_name_data : str
+        Name for the image uploaded by the user or image data if
+        is_streaming is True.
+    is_streaming : bool
+        Whether streaming mode is enabled or not
     annotation_style : str
         Annotation style to display output image ('heatmap' or 'bbox')
     show_heuristic: bool 
@@ -34,11 +37,14 @@ def model_predict(image_name: str, annotation_style: str, show_heuristic: bool):
         score as a number.
     """
 
+    print('model_predict called')
+
     # Assign an unique ID for this job and add it to the queue..
     job_id = str(uuid4())
     job_data = {
                   "id": job_id,
-                  "image_name": image_name,
+                  "is_streaming": is_streaming,
+                  "image_name_data": image_name_data,
                   "annotation_style": annotation_style,
                   "show_heuristic": show_heuristic
                 }
@@ -63,6 +69,6 @@ def model_predict(image_name: str, annotation_style: str, show_heuristic: bool):
 
     #  Change the output format
     response_dict =json.loads(response)                                                
-    mAP = response_dict.values()
+    mAP = response_dict["mAP"]
     
     return mAP

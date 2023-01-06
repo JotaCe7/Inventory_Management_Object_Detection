@@ -1,0 +1,18 @@
+
+body {
+  background-color: #192B56;
+  font-family: 'Kamerik 105 Cyrillic';
+  word-spacing: 0.3em;
+  letter-spacing: 0.07em;
+  color: whitesmoke;
+  font-weight: bold;
+  margin: 0px;
+}
+
+
+.btnstream {
+  z-index: 4;
+  position: relative;
+}
+
+

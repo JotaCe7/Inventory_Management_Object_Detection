@@ -14,6 +14,15 @@ from flask import (
 )
 from middleware import model_predict
 
+
+from flask_socketio import SocketIO, emit
+from engineio.payload import Payload
+
+
+
+Payload.max_decode_packets = 2048
+
+
 router = Blueprint("app_router", __name__, template_folder="templates")
 
 @router.route("/new_prediction", methods=["GET"])
@@ -41,20 +50,23 @@ def index():
         return render_template("index.html")
 
     if request.method == "POST":
+        print('POST')
         # No file received, show basic UI
         if "file" not in request.files:
             flash("No file part")
             return redirect(request.url)
+        print('file in request.files')
 
         # File received but no filename is provided, show basic UI
         file = request.files["file"]
         if file.filename == "":
             flash("No image selected for uploading")
             return redirect(request.url)
+        print(file.filename)
 
         # File received and it's an image, we must show it and get predictions
         if file and utils.allowed_file(file.filename):
-            
+            print('file allowed')
             # Creates unique name
             img_name = utils.get_file_hash(file)
             img_path = os.path.join(settings.UPLOAD_FOLDER,img_name)
@@ -65,6 +77,7 @@ def index():
             file.close()
             if 'rbtn_output_selection' in request.form:
               annotation_style = request.form['rbtn_output_selection']
+              print(annotation_style)
             else:
               flash("** Please select an annotation style")
               return redirect(request.url+"#upload_image")
@@ -79,7 +92,8 @@ def index():
             print(annotation_style)
 
             # Sent image to be processed by the ML model
-            mAP = model_predict(img_name, annotation_style, show_heuristic)
+            is_streaming = False
+            mAP = model_predict(img_name, is_streaming, annotation_style, show_heuristic)
         
             # Updates context
             context = {
@@ -133,6 +147,14 @@ def display_heuristic(filename):
     filename2 = basename + "_heur" + extension
 
     return redirect(url_for("static", filename="predictions/" + filename2))
+
+@router.route("/display_stream")
+def display_stream():
+    """
+    Display image predicted by the model in our UI.
+    """
+
+    return redirect(url_for("static", filename="predictions/readb64.jpg"))
 
 @router.route("/predict", methods=["GET", "POST"])
 def predict(file = None):

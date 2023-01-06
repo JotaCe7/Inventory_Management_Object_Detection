@@ -4,13 +4,17 @@ import time
 import sys
 
 import numpy as np
-import pandas as pd
 import cv2
 import redis
 import settings
 from utils_model.get_model import get_model
 
 from utils_model.bboxes import plot_bboxes, NMS, euristic_detection
+
+import io
+from PIL import Image
+import base64
+
 
 # Connect to Redis
 db = redis.Redis(
@@ -75,6 +79,28 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
       cv2.imwrite(pred_img_path, img_pred)     
       return img_pred       
 
+def readb64(base64_string):
+    idx = base64_string.find('base64,')
+    base64_string  = base64_string[idx+7:]
+
+    sbuf = io.BytesIO()
+
+    sbuf.write(base64.b64decode(base64_string, ' /'))
+    pimg = Image.open(sbuf)
+
+
+    img =  cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
+
+
+    # Get bounding boxes
+    output = model(img)
+    # Non-Max Supression: Filter only best bounding boxes
+    #best_bboxes = NMS(output.xyxy[0].numpy(), overlapThresh= settings.OVERLAP_THRESH)
+    img_pred = plot_bboxes(img, box_coordinates= output.xyxy[0].numpy().astype(int), style = 'bbox')
+
+
+    cv2.imwrite(os.path.join(settings.PREDICTIONS_FOLDER, 'readb64.jpg'), img_pred)
+
 def classify_process():
     """
     Loop indefinitely asking Redis for new jobs.
@@ -93,13 +119,18 @@ def classify_process():
         
         # Decode image_name
         job_data = json.loads(job_data_str.decode('utf-8'))
-        img_name = job_data['image_name']
         job_id =  job_data['id']
+        is_streaming = job_data['is_streaming']
+        image_name_data = job_data['image_name_data']
         annotation_style = job_data['annotation_style']
         show_heuristic = job_data['show_heuristic']
 
         # Predict
-        img_out = predict_bboxes(img_name, annotation_style, show_heuristic)
+        if is_streaming:
+          print('is_streaming')
+          readb64(image_name_data)
+        else:
+          img_out = predict_bboxes(image_name_data, annotation_style, show_heuristic)
         
         pred_dict = {
                     "mAP": "[TO BE IMPLEMENTED]",

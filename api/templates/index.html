@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -13,6 +14,10 @@
       type="text/css"
       href="{{ url_for('static', filename='web/styles/style.css') }}"
     />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.5/socket.io.min.js'></script>
+    
   </head>
 
   <body>
@@ -104,9 +109,22 @@
         <div><a href="{{ url_for('app_router.new_upload') }}" class="label_button">Upload</a> a new image</div>
     
       {% endif %}
+
+      <button class='btnstream' id="start">Start streaming</button>
+      <button class='btnstream' id="stop">Stop streaming</button>
+
     </section>
 
-    
+
+    <div id="container">
+      <video autoplay playsinline id="videoElement"></video>
+      <canvas id="canvas"></canvas>
+      </div>
+  
+      <div class = 'video'>
+          <img id="photo"  >
+          <h1>video</h1>
+      </div>
 
     <div id="messages-section">
       {% with messages = get_flashed_messages() %} {% if messages %} {% for
@@ -119,7 +137,166 @@
       {% endfor %} {% endif %} {% endwith %}
     </div>
 
-    <script src="{{ url_for('static', filename='web/js/app.js') }}"></script>
+    
+
+    
+
+
+
+
+
+
+      <script src="{{ url_for('static', filename='web/js/app.js') }}"></script>
+
+
+      <script type="text/javascript" charset="utf-8">
+
+        
+
+        var is_recording = false;
+        
+        var socket = io.connect(window.location.protocol + '//' + document.domain + ':' + location.port);
+        socket.on('connect', function(){
+            console.log("Connected...!", socket.connected)
+        });
+
+
+        var canvas = document.getElementById('canvas');
+        const video = document.querySelector("#videoElement");
+        const stream_container2 = document.getElementById("photo");
+        canvas.style.width = window.innerWidth
+        canvas.style.height = window.innerHeight;
+        var context = canvas.getContext('2d');
+
+        const myheight = 0;
+        const mywidth = 0;
+        function resize() {
+        console.log('resize')
+        videoRatio = video.height / video.width;
+        windowRatio = window.innerHeight / window.innerWidth; /* browser size */
+
+
+            if (windowRatio < videoRatio) {
+                if (window.innerHeight > 50) { /* smallest video height */
+                  video.height = window.innerHeight;
+                } else {
+                  video.height = 50;
+            }
+            } else {
+              video.width = window.innerWidth;
+            }
+
+        };
+        console.log('BEFORE RESIZE');
+        console.log(video.height);
+        console.log(video.width);
+
+        resize();
+        console.log('AFTER RESIZE');
+        console.log(video.height);
+        console.log(video.width);
+
+        video.width = window.innerWidth;
+        // video.height = window.innerHeight;
+        // video.width = video.clientWidth;
+        // video.height = video.clientHeight; 
+        console.log(window.innerWidth)
+        console.log(window.innerHeight)
+        console.log(video.clientWidth)
+        console.log(video.clientHeight)
+
+        const getCameraSelection = async () => {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoDevices = devices.filter(device => device.kind === 'videoinput');
+          const options = videoDevices.map(videoDevice => {
+            return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
+          });
+          cameraOptions.innerHTML = options.join('');
+        };
+
+        document.querySelector("#start").addEventListener('click', async (e) => {
+          console.log("START")
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+              facingMode: 'environment'
+              // facingMode: 'user'
+            }
+          })
+          .then(function (stream) {
+              video.srcObject = stream;
+              video.play();
+          })
+          .catch(function (err0r) {
+
+          });
+          is_recording = true;
+        })
+
+        document.querySelector("#stop").addEventListener('click', async (e) => {
+          const mediaStream = video.srcObject;
+          const tracks = mediaStream.getTracks();
+          tracks[0].stop();
+          is_recording = false;
+        })
+    
+
+        // if (navigator.mediaDevices.getUserMedia) {
+        //     navigator.mediaDevices.getUserMedia({ video: true })
+        //     .then(function (stream) {
+        //         video.srcObject = stream;
+        //         video.play();
+        //     })
+        //     .catch(function (err0r) {
+
+        //     });
+        // }
+
+        // const FPS = 1;
+        // setInterval(() => {
+
+
+        //   var resizedCanvas = document.createElement("canvas");
+        //   var resizedContext = resizedCanvas.getContext("2d");
+
+        //   resizedCanvas.height = video.clientHeight;
+        //   resizedCanvas.width = video.width;
+
+        //   var canvas = document.getElementById("original-canvas");
+
+        //   // resizedContext.drawImage(canvas, 0, 0, 200, 100);
+        //   // var myResizedData = resizedCanvas.toDataURL();
+
+        //     width=video.width;
+        //     height=video.clientHeight;
+        //     resizedContext.drawImage(video, 0, 0, width , height );
+        //     var data = resizedCanvas.toDataURL('image/jpeg', 0.92);
+        //     resizedContext.clearRect(0, 0, width,height );
+        //     if(is_recording === true) {
+        //       socket.emit('image', data);
+        //       console.log('RECORDING')
+        //     }
+        //     else {
+        //       console.log('NOT RECORDING')
+        //     }
+        // }, 5000/FPS);
+
+        // socket.on('response_back', function(image){
+        //   // var stream_container = document.getElementById("photo");
+        //         // photo.setAttribute('src', "{{ url_for('app_router.display_stream') }}" );
+        //         // stream_container.src = "{{ url_for('app_router.display_stream') }}";
+        //       var stream_container = document.getElementById("photo");
+        //       // photo.setAttribute('src', "{{ url_for('app_router.display_stream') }}" );
+        //       source = "{{ url_for('app_router.display_stream') }}";
+        //       timestamp = (new Date()).getTime(),
+        //       newUrl = source + '?_=' + timestamp;
+        //       stream_container.src = newUrl 
+        // });
+        // getCameraSelection();
+
+    </script>
+
+
 
     <noscript>You need to enable JavaScript to view the full site.</noscript>
   </body>

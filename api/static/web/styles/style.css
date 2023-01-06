@@ -6,6 +6,7 @@ body {
     letter-spacing: 0.07em;
     color: whitesmoke;
     font-weight: bold;
+    margin: 0px;
 }
 
 section {
@@ -141,6 +142,7 @@ input[type=text] {
 }
 
 #prediction {
+  
     display: block;
     position: relative;
     margin-top: 2cm;
@@ -283,3 +285,11 @@ footer {
   margin-top: 1.2em;
   margin-right: 1em;
 }
+
+.btnstream {
+  position: relative;
+  z-index: 3;
+}
+
+
+
