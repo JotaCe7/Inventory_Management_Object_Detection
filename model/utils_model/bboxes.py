@@ -1,7 +1,5 @@
 # Python imports
-import cv2
 import numpy as np
-import pandas as pd
 
 # Self-made
 from enum import Enum
@@ -94,10 +92,23 @@ def apply_heatmap(img, bboxes, colormap):
   return img
 
 def euristic_detection(img, box_coordinates):
+  """
+  Performs heuristic detection to detect missing objects on an image.
+
+  Parameters
+  ----------
+  img:
+      image file
+  box_coordinates:
+      array of bounding boxes coordinates for products in the image
+        
+  Returns
+  ----------
+  img: np.array (Optional)
+      image with missing object detected in an heuristic way.
+
+  """
   
-  #Read the image
-  # img = cv2.imread(img_path)
-  # x_min,x_max,y_min,y_max = box_coordinates["x1"].min(), box_coordinates["x2"].max(), box_coordinates["y1"].min(), box_coordinates["y2"].max()
   x_min,x_max,y_min,y_max = box_coordinates[:,0].min(), box_coordinates[:,2].max(), box_coordinates[:,1].min(), box_coordinates[:,3].max()
   height, width, channels = img.shape
 
@@ -144,6 +155,22 @@ def euristic_detection(img, box_coordinates):
   return crop
 
 def merge_empty_detection(img, detection, x_y_min):
+  """
+  Merge an image file with its cropped heuristic detection
+  Parameters
+  ----------
+  img:
+      image file
+  detection:
+      cropped heuristic detection image
+  x_y_min: tuple
+      x min and y min from all bounding boxes as a tuple
+        
+  Returns
+  ----------
+  img: np.array 
+      Merged image
+  """
   if detection.ndim == 2:
     h,w   = detection.shape
     n_channels = 1
@@ -208,9 +235,5 @@ def NMS(boxes, overlapThresh = 0.4):
             indices = indices[indices != i]
             
     best_bboxes =   boxes[indices].astype(int)
-    
-    
-    #best_bboxes_df = pd.DataFrame(data = best_bboxes, columns=["x1","y1","x2","y2","class"])
-    
     
     return best_bboxes

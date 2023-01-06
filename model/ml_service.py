@@ -32,11 +32,16 @@ def predict_bboxes(img_name, annotation_style, show_heuristic=False):
 
     Parameters
     ----------
-    None
+    img_name: 
+      Name of image file
+    annotation_style:
+      How to display detect objects bounding boxes: ('heat' for heatmap or 'bbox' for bounding boxes)
+    show_heuristic:
+      Whether to diplay heuristic missing objects detection or not.
 
     Returns
     -------
-    None
+      Anotated image
     """
     # Load original image
     orig_img_path = os.path.join(settings.UPLOAD_FOLDER,img_name)

@@ -13,7 +13,7 @@ OVERLAP_THRESH = 0.7
 # Models
 MODELS_FOLDER_S3 = "anyoneai-datasets/trained_models"
 MODELS_FOLDER = "models/"
-BEST_MODEL = "bestv2.pt" 
+BEST_MODEL = "best.pt" 
 
 # CLASSES
 class CLASSES(Enum):
